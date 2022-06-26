@@ -99,7 +99,7 @@ function openCvReady() {
       let paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC1, [255,255,255,255]);
       let points = [];
       let connect = [];
-      //let kernel = new cv.Mat.ones(5,5,cv.CV_8UC1);
+      let kernel = new cv.Mat.ones(5,5,cv.CV_8UC1);
   
       let cap = new cv.VideoCapture(cam_input);
   
@@ -138,12 +138,11 @@ function openCvReady() {
        }
   
        //---------------------------------------------------------- creating kernel for morphological operations 
-          let kernel = cv.matFromArray(5, 5, cv.CV_8UC1, k);
           cv.cvtColor(src,hsv, cv.COLOR_BGR2HSV);
           cv.inRange(hsv ,lower_hsv, upper_hsv , mask);
-          // cv.erode(mask ,mask , kernel);
-          // cv.morphologyEx(mask,mask , cv.MORPH_OPEN, kernel);
-          // cv.dilate(mask,mask , kernel);
+          cv.erode(mask ,mask , kernel);
+          cv.morphologyEx(mask,mask , cv.MORPH_OPEN, kernel);
+          cv.dilate(mask,mask , kernel);
   
       //----------------------------------------------------------- Find Contours
           let contours = new cv.MatVector();
