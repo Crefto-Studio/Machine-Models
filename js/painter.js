@@ -96,7 +96,7 @@ function openCvReady() {
       let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
       let hsv = new cv.Mat(video.height, video.width, cv.CV_8UC1);
       let mask = new cv.Mat(video.height, video.width, cv.CV_8UC1);
-      let paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC1, [255,255,255,255]);
+      let paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
       let points = [];
       let connect = [];
       let kernel = new cv.Mat.ones(5,5,cv.CV_8UC1);
@@ -174,7 +174,7 @@ function openCvReady() {
                   points = [];
                   connect = [];
                   paint_window.delete();
-                  paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC1, [255,255,255,255]);
+                  paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
               }
               // if the points and event on exist then push else don't
               else if(center[0] && (Draw_event == true))
