@@ -35,7 +35,7 @@ function openCvReady() {
      
 
   //---------------------------------------------------- Generating Mode Values
-      const modes = ['toggle','hold'];
+      const modes = ['toggle','hold','line-toggle','circle-toggle'];
       // generate the radio group        
       const group = document.querySelector("#mode");
       if(group.innerHTML == "")
@@ -69,12 +69,12 @@ function openCvReady() {
           {
               return;
           }
-          if (event.code === "Space" && mode == "hold") // handle space hold when space is pressed
+          if (event.code == "Space" && mode == "hold") // handle space hold when space is pressed
           {
               Draw_event = true;
             //   console.log('Space');
           }
-          else if (event.code === "Space" && mode == "toggle") // handle space toggle
+          else if (event.code == "Space" && mode == "toggle") // handle space toggle
           {
               if(toggle == false) // if toggle was false and i pressed on space then this is an order to start drawing
               {
@@ -91,6 +91,10 @@ function openCvReady() {
                   connect.push(false); // it means this point is not connected to the next one
               }
           }
+          else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle"))
+          {
+            Draw_event = true;
+          }
       event.preventDefault();
       }, true);
   
@@ -101,7 +105,7 @@ function openCvReady() {
           {
               return;
           }
-          if (event.code === "Space" && mode == "hold") // handle space hold when space is released
+          if (event.code == "Space" && mode == "hold") // handle space hold when space is released
           {
               //manage connectivity :
               if(Draw_event)
@@ -112,10 +116,14 @@ function openCvReady() {
                 //   console.log('Space false');
               }
           }
-          else if (event.code === "Space" && mode == "toggle" && toggle ==true) // handle space toggle when space is released
+          else if (event.code == "Space" && mode == "toggle" && toggle ==true) // handle space toggle when space is released
           {
               Draw_event = true;
             //   console.log('Space');
+          }
+          else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle"))
+          {
+              Draw_event = false;
           }
       event.preventDefault();
       }, true);
@@ -136,8 +144,14 @@ function openCvReady() {
       let mask = new cv.Mat(video.height, video.width, cv.CV_8UC1);
       let paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
       let points = [];
+      let line_points =[];
+      let circle_points =[];
       let color_points = [];
+      let color_line_points = [];
+      let color_circle_points = [];
       let stroke_points= [];
+      let stroke_line_points= [];
+      let stroke_circle_points= [];
       let connect = [];
       let kernel = new cv.Mat.ones(5,5,cv.CV_8UC1);
   
@@ -251,28 +265,56 @@ function openCvReady() {
               center = [M.m10/M.m00,M.m01/M.m00];
                           //   console.log('center',center);
               let p  = new cv.Point(center[0], center[1]);
+
+              //Marker
               cv.line(src, p, p, rgba ,stroke_value); // Last parameter is the thickness  
-              if ( (center[0] <= 150) && (center[1] <= 65) && (Draw_event == true) )
-              {
-                  points = [];
-                  connect = [];
-                  color_points = [];
-                  stroke_points = [];
-                  paint_window.delete();
-                  paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
-              }
-              // if the points and event on exist then push else don't
-              else if(center[0] && (Draw_event == true))
-              {
-                  points.push(center);
-                  connect.push(true); //this point is connected to next one until the opposite is proved
-                  color_points.push(rgba);
-                  stroke_points.push(stroke_value);
-              }
               
+              if(center[0] && Draw_event == true)
+              {
+                    //case clear all
+                    if ( (center[0] <= 150) && (center[1] <= 65))
+                    {
+                        points = [];
+                        connect = [];
+                        color_points = [];
+                        stroke_points = [];
+                        line_points = [];
+                        color_line_points =[];
+                        stroke_line_points = [];
+                        circle_points =[];
+                        color_circle_points =[];
+                        stroke_circle_points = [];
+                        paint_window.delete();
+                        paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
+                    }
+                    // case connected points
+                    else if(mode == 'hold' || mode =='toggle')
+                    {
+                        points.push(center);
+                        connect.push(true); //this point is connected to next one until the opposite is proved
+                        color_points.push(rgba);
+                        stroke_points.push(stroke_value);
+                    }
+                    // case line points
+                    else if(mode == 'line-toggle')
+                    {
+                        line_points.push(center);
+                        color_line_points.push(rgba);
+                        stroke_line_points.push(stroke_value);
+                    }
+                    // case circle points
+                    else if(mode == 'circle-toggle')
+                    {
+                        circle_points.push(center);
+                        color_circle_points.push(rgba);
+                        stroke_circle_points.push(stroke_value);
+                    }
+              }
           }
   
-      //----------------------------------------------------------- Drawing Line
+      //----------------------------------------------------------- Drawing
+          
+          // Draw the connected points
           for(var i=1;i<points.length;i++)
           {
                   //  if the current point is connected to the last point then draw else don't
@@ -281,11 +323,53 @@ function openCvReady() {
                       let p1  = new cv.Point(points[i][0], points[i][1]);
                       let p2  = new cv.Point(points[i-1][0], points[i-1][1]);
                       cv.line(src, p1, p2, color_points[i] ,stroke_points[i]); // Last parameter is the thickness
+                      //Just draw the latest point in paint draw (for optimization purpose).
                       if(i == points.length-1)
-                        cv.line(paint_window, p1, p2, color_points[i] ,stroke_points[i]); // Last parameter is the thickness
+                        cv.line(paint_window, p1, p2, color_points[i] ,stroke_points[i]);
                   }
           }
+          
+          //Draw the Lines (if exist)
+          for(var i=0;i<line_points.length;i++)
+          {
+                let p1  = new cv.Point(line_points[i][0], line_points[i][1]);
+                if(i%2 == 0)
+                {
+                    cv.line(src, p1, p1, color_line_points[i] ,stroke_line_points[i]);
+                }
+                else 
+                {
+                    let p2  = new cv.Point(line_points[i-1][0], line_points[i-1][1]);
+                    cv.line(src, p1, p2, color_line_points[i] ,stroke_line_points[i]);
+                    //Just draw the latest point in paint draw (for optimization purpose).
+                    if(i == line_points.length-1)
+                        cv.line(paint_window, p1, p2, color_line_points[i] ,stroke_line_points[i]);
+                }
+          }
 
+          // Draw the Circles
+          for(var i=0;i<circle_points.length;i++)
+          {
+                if((i==circle_points.length - 1) && (i%2 == 0))
+                {
+                    let p1  = new cv.Point(circle_points[i][0], circle_points[i][1]);
+                    cv.line(src, p1, p1, color_circle_points[i] ,stroke_circle_points[i]);
+                }
+                else if(i%2 !=0)
+                {
+                    let pcenter  = new cv.Point(circle_points[i-1][0], circle_points[i-1][1]);
+                    cx = circle_points[i-1][0];
+                    cy = circle_points[i-1][1];
+                    px = circle_points[i][0];
+                    py = circle_points[i][1];
+                    
+                    radius = Math.abs(((cx-px)^2 + (cy -py)^2)^0.5);
+                    console.log('radius' , radius);
+                    cv.circle(src, pcenter, radius, color_circle_points[i] ,stroke_circle_points[i]);
+                    if(i == circle_points.length-1)
+                        cv.circle(paint_window, pcenter, radius, color_circle_points[i] ,stroke_circle_points[i]);
+                }
+          }
   
   
       //----------------------------------------------------------- IM SHOW
