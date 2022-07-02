@@ -49,8 +49,13 @@
             color: #cccccc;
             font-family: 'Roboto', sans-serif;
         }
-
-        #sketchpad, #rendered {
+        #virtual_painter_Canvas{
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            align-items: center;
+        }
+        #sketchpad, #rendered ,#canvas_output2,#canvas_output3{
             width: 512px;
             height: 512px;
             background: #262626;
@@ -74,7 +79,7 @@
             font-size: 80px;
             color: #adadad;
         }
-        .no-render .label {
+        .no-render>.label {
             font-size: 12px;
             margin-top: 8px;
             color: #adadad;
@@ -145,10 +150,25 @@
             color: white;
         }
 
-        input {
+        input,#virtual ,#Exit_Button{
             width: 98%;
         }
-        input[type="button"] {
+        #Exit_Button,p{
+            display: none;
+        }
+        #Exit_Button2{
+            background: none;
+            color: inherit;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
+            outline: inherit;
+        }
+        #hold,#toggle{
+            width: 20%;
+        }
+        input[type="button"] ,#virtual,#Exit_Button{
             padding: 7px;
             background: #676767;
             color: white;
@@ -165,8 +185,20 @@
         .color:active {
             border: #AFF20A 4px solid;
         }
+        #Modes{
+            display: flex;
+            flex-direction: column;
+        }
+        #mode{
+            display: flex;
+            flex-direction: row; 
+        }
+        #mode>label{
+            margin-left: -0.5rem; 
+        }
     </style>
     <script type="text/babel">
+        // this.sketchpad.color = 'none';
         const colorMap = [
             { color: "#384f83", id: 154, label: "sea" },
             { color: "#efefef", id: 105, label: "cloud", labelColor: "black" },
@@ -206,7 +238,8 @@
                 this.state = {
                     image: null,
                     strokeWidth: 18,
-                    url: this.canvasRef
+                    url: this.canvasRef,
+                    draw_color : 'None'
                 };
             }
 
@@ -236,6 +269,9 @@
 
             setSketchColor = (color) => {
                 this.sketchpad.color = color;
+                this.setState({
+                    draw_color: color,
+                });
             }
 
             setSketchStrokeWidth = (width) => {
@@ -288,37 +324,48 @@
                     <div className="container">
                         <div id="toolbar">
                             <div className="row">
-                                <input type="button" value="Clear" onClick={() => this.clearSketch()} />
+                                <input id="clear_btn" type="button" value="Clear" onClick={() => this.clearSketch()} />
                                 {console.log(this.state.url)}
-                                <a href={this.state.url} download><input type="button" value="Save" onClick={() => this.downloadCanvas(this, 'Drawing.png')} /></a>
-                                
+                                <a id="save_btn" href={this.state.url} download><input type="button" value="Save" onClick={() => this.downloadCanvas(this, 'Drawing.png')} /></a>
+                                {/* button Event for Virtual painter*/}
+                                <button id="virtual" onClick={openCvReady}>Virtual Painter</button>
+                                  {/* Exit Button for virtual Painter*/}
+                                <button id="Exit_Button" className="btn" onClick={exit_now}>Exit</button>
+                                {/* Modes of Drawing in Virtual painter*/}
+                                <div id="Modes">
+                                    <p>Select your work mode:</p>
+                                    <div id="mode">
+
+                                        </div>
+                                </div>
+                               
                             </div>
-                            <div className="row">
-                                <div className="label">Stroke Thickness: {this.state.strokeWidth}px</div>
+                            <div  id="stroke" className="row">
+                                <div id = "stroke_value" className="label">Stroke Thickness: {this.state.strokeWidth}px</div>
                                 <div className="field">
-                                    <input type="range" min="1" max="80" 
+                                    <input type="range" min="1" max="80" id="stroke_width"
                                         value={this.state.strokeWidth}
-                                        onChange={(e) => this.setSketchStrokeWidth(parseInt(e.target.value))} />
+                                        onChange={(e) => {
+                                            this.setSketchStrokeWidth(parseInt(e.target.value));
+                                        }} />
                                 </div>
                             </div>
                             <div className="row color-panel">
-                                <div className="label">Color Palette:</div>
+                                <div className="label">Color Palette: {this.state.draw_color}</div>
                                 <div className="scroll">
                                     {colorMap.map(c => 
-                                        <div key={c.color} className="color" style={{
+                                        <div key={c.color} id={c.color==this.state.draw_color ? "colorValue" : ""} className="color" style={{
                                             'background': c.color,
                                             'color': c.labelColor || 'white',
                                             'textShadow': c.labelColor ? '' : '0 0 1px black' 
                                         }} onClick={() => this.setSketchColor(c.color)}>{c.label}</div>
-                                    )}
+                                    )
+                                }
                                 </div>
                             </div>
                         </div>
-                        {/* button Event for Virtual painter*/}
-                        <button className="btn-render" onClick={openCvReady}>Virtual Painter</button>
-                        {/* Modes of Drawing in Virtual painter*/}
-                        <div id="Modes">
-                        </div>
+                        
+                        
                         {/*Virtual Painter output Canvas*/}
                         <div id="virtual_painter_Canvas">
                         </div>
@@ -333,8 +380,7 @@
                             <div className="btn-render" onClick={this.generateSketch}>Generate Image</div>
                         </div>
                     </div>
-                    {/* Exit Button for virtual Painter*/}
-                        <button id = "Exit_Button" className="btn" onClick={exit_now}>Exit</button>
+                   
                     
                 </React.Fragment>;
             }

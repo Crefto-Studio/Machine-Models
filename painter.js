@@ -4,22 +4,46 @@ function openCvReady() {
       let toggle =false;
       let mode = null;
       let color = "green";
+    //   let strokeID = document.getElementById("stroke_value");
+    //   let stroke_str = strokeID.innerHTML;
+    //   let stroke_value = 5; //By default
+    //   if(stroke_str[19] == 'p')
+    //     stroke_value = parseInt(stroke_str[18]);
+    //   else 
+    //     stroke_value = parseInt(stroke_str[18]+stroke_str[19]);
+      //hide sketch
+      document.querySelector("#sketchpad").style.display="none";
+      document.querySelector("#rendered").style.display="none";
+      document.querySelector("#clear_btn").style.display="none";
+      document.querySelector("#save_btn").style.display="none";
+    //   document.querySelector("#stroke").style.display="none";
+      document.querySelector("#virtual").style.display="none";
 
+      document.querySelector("#Exit_Button").style.display="block"; 
+      document.querySelector("p").style.display="block";      
+     
   // Canvas Queries and exit button
       const output_canvas = document.querySelector("#virtual_painter_Canvas");
-      output_canvas.innerHTML = '<video id="cam_input" height="480" width="640" ></video>'+'<canvas id="canvas_output2" className="s"></canvas>'+
-      '<canvas id="canvas_output3" className="s"></canvas>';
+    //   a = output_canvas.innerHTML;
+    //   console.log("output canvas : ",a);
+      if(output_canvas.innerHTML == "")
+        output_canvas.innerHTML = '<video id="cam_input" height="480" width="640" ></video>'+'<canvas id="canvas_output2" className="s"></canvas>'+
+        '<canvas id="canvas_output3" className="s"></canvas>';
       const Exit_button = document.getElementById("Exit_Button");
-      Exit_button.innerHTML ='<button className="btn" onClick={exit_now}>Exit</button>';
+      if(Exit_button == "")
+        Exit_button.innerHTML ='<button id="Exit_Button2" onClick={exit_now}>Exit</button>';
+     
 
   //---------------------------------------------------- Generating Mode Values
       const modes = ['toggle','hold'];
       // generate the radio group        
-      const group = document.querySelector("#Modes");
-      group.innerHTML = modes.map((modes) => `<div>
-              <input type="radio" name="mode" value="${modes}" id="${modes}">
-              <label for="${modes}">${modes}</label>
-          </div>`).join(' ');
+      const group = document.querySelector("#mode");
+      if(group.innerHTML == "")
+        group.innerHTML += modes.map((modes) => `
+                <input type="radio" name="mode" value="${modes}" id="${modes}">
+                <label for="${modes}">${modes}</label>
+            `).join(' ');
+     
   
       // add an event listener for the change event
       const radioButtons = document.querySelectorAll('input[name="mode"]');
@@ -32,9 +56,9 @@ function openCvReady() {
               mode=this.value;
       }
   //---------------------------------------------------- Display divisions again in case exit
-      output_canvas.style.display='inline';
-      group.style.display='inline';
-      Exit_button.style.display ='inline';
+     output_canvas.style.display='block';
+     group.style.display='flex';
+     Exit_button.style.display ='inline';
     //   Exit_button.style.display='inline';
       c=false;
   
@@ -126,14 +150,34 @@ function openCvReady() {
             output_canvas.style.display='none';
             group.style.display='none';
             Exit_button.style.display = 'none';
+            document.querySelector("#virtual").style.display='inline';
             src.delete();
             hsv.delete();
             mask.delete();
             paint_window.delete(); 
             return; 
           }
-          let begin = Date.now();
-          cap.read(src);
+          
+        let begin = Date.now();
+        cap.read(src);
+        cv.flip(src,src,1);
+        let stroke_value = parseInt(document.getElementById('stroke_width').value);
+        let paint_Color = document.getElementById('colorValue').style.background;
+        let rgba =[];
+        let value="";
+        for(let i=4; i<paint_Color.length ; i++)
+        {
+            if(paint_Color[i] == ' ')
+                continue ;
+            else if ( paint_Color[i] == ',' || paint_Color[i] == ')' )
+            {
+                rgba.push(parseInt(value));
+                value= "";
+            }
+            else
+                value = value + paint_Color[i];
+        }
+        rgba.push(255);
           //src.copyTo(hsv);
   
             //   let lower_hue = document.getElementById('lower_hue').value;
@@ -155,8 +199,8 @@ function openCvReady() {
             }
 
   
-          console.log('lower : ',lower_hsv_a);
-          console.log('upper : ',upper_hsv_a);
+        //   console.log('lower : ',lower_hsv_a);
+        //   console.log('upper : ',upper_hsv_a);
   
        let lower_hsv = cv.matFromArray(1, 3, cv.CV_8UC1, lower_hsv_a);
        let upper_hsv = cv.matFromArray(1, 3, cv.CV_8UC1, upper_hsv_a);
@@ -209,7 +253,7 @@ function openCvReady() {
                   points = [];
                   connect = [];
                   paint_window.delete();
-                  paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC1, [255,255,255,255]);
+                  paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
               }
               // if the points and event on exist then push else don't
               else if(center[0] && (Draw_event == true))
@@ -227,10 +271,11 @@ function openCvReady() {
                   {
                       let p1  = new cv.Point(points[i][0], points[i][1]);
                       let p2  = new cv.Point(points[i-1][0], points[i-1][1]);
-                      cv.line(src, p1, p2, [0, 255, 0, 255],5); // Last parameter is the thickness
-                      cv.line(paint_window, p1, p2, [0, 255, 0, 255],5); // Last parameter is the thickness
+                      cv.line(src, p1, p2, rgba ,stroke_value); // Last parameter is the thickness
+                      cv.line(paint_window, p1, p2, rgba ,stroke_value); // Last parameter is the thickness
                   }
           }
+        //   console.log('POINTS : ' , points);
   
   
       //----------------------------------------------------------- IM SHOW
@@ -248,4 +293,10 @@ function openCvReady() {
 function exit_now()
 {
     c = true;
+    document.querySelector("#sketchpad").style.display="block";
+    document.querySelector("#rendered").style.display="flex";
+    document.querySelector("#clear_btn").style.display="block";
+    document.querySelector("#save_btn").style.display="block";
+    document.querySelector("#stroke").style.display="block"; 
+    document.querySelector("p").style.display="none"; 
 }
