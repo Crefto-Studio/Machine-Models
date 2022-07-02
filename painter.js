@@ -137,6 +137,7 @@ function openCvReady() {
       let paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
       let points = [];
       let color_points = [];
+      let stroke_points= [];
       let connect = [];
       let kernel = new cv.Mat.ones(5,5,cv.CV_8UC1);
   
@@ -209,8 +210,8 @@ function openCvReady() {
        let rect1  = new cv.Point(40, 1);
        let rect2  = new cv.Point(140, 65);
        let rect3  = new cv.Point(49,33);
-       let clear = cv.rectangle(src, rect1, rect2, [0,0,0,0],1 );
-       cv.putText(src, 'Clear all', rect3, cv.FONT_HERSHEY_SIMPLEX, 0.5, [0,0,0,0],2); //(input , text , position , font , font scale , color , thickness)
+       let clear = cv.rectangle(src, rect1, rect2, [0,0,0,255],5 );
+       cv.putText(src, 'Clear all', rect3, cv.FONT_HERSHEY_SIMPLEX, 0.65, [0,0,0,255],2); //(input , text , position , font , font scale , color , thickness)
    
        let k = Array(5);
        for (var i = 0; i < 5; i++) {
@@ -248,12 +249,15 @@ function openCvReady() {
   
               let M = cv.moments(cnt, false);
               center = [M.m10/M.m00,M.m01/M.m00];
-              
-              if ( (center[1] <= 65) && (40 <= center[0] <= 140))
+                          //   console.log('center',center);
+              let p  = new cv.Point(center[0], center[1]);
+              cv.line(src, p, p, rgba ,stroke_value); // Last parameter is the thickness  
+              if ( (center[0] <= 150) && (center[1] <= 65) && (Draw_event == true) )
               {
                   points = [];
                   connect = [];
                   color_points = [];
+                  stroke_points = [];
                   paint_window.delete();
                   paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
               }
@@ -263,7 +267,9 @@ function openCvReady() {
                   points.push(center);
                   connect.push(true); //this point is connected to next one until the opposite is proved
                   color_points.push(rgba);
+                  stroke_points.push(stroke_value);
               }
+              
           }
   
       //----------------------------------------------------------- Drawing Line
@@ -274,11 +280,12 @@ function openCvReady() {
                   {
                       let p1  = new cv.Point(points[i][0], points[i][1]);
                       let p2  = new cv.Point(points[i-1][0], points[i-1][1]);
-                      cv.line(src, p1, p2, color_points[i] ,stroke_value); // Last parameter is the thickness
-                      cv.line(paint_window, p1, p2, color_points[i] ,stroke_value); // Last parameter is the thickness
+                      cv.line(src, p1, p2, color_points[i] ,stroke_points[i]); // Last parameter is the thickness
+                      if(i == points.length-1)
+                        cv.line(paint_window, p1, p2, color_points[i] ,stroke_points[i]); // Last parameter is the thickness
                   }
           }
-        //   console.log('POINTS : ' , points);
+
   
   
       //----------------------------------------------------------- IM SHOW
