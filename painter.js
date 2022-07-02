@@ -136,6 +136,7 @@ function openCvReady() {
       let mask = new cv.Mat(video.height, video.width, cv.CV_8UC1);
       let paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
       let points = [];
+      let color_points = [];
       let connect = [];
       let kernel = new cv.Mat.ones(5,5,cv.CV_8UC1);
   
@@ -252,6 +253,7 @@ function openCvReady() {
               {
                   points = [];
                   connect = [];
+                  color_points = [];
                   paint_window.delete();
                   paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
               }
@@ -260,6 +262,7 @@ function openCvReady() {
               {
                   points.push(center);
                   connect.push(true); //this point is connected to next one until the opposite is proved
+                  color_points.push(rgba);
               }
           }
   
@@ -271,8 +274,8 @@ function openCvReady() {
                   {
                       let p1  = new cv.Point(points[i][0], points[i][1]);
                       let p2  = new cv.Point(points[i-1][0], points[i-1][1]);
-                      cv.line(src, p1, p2, rgba ,stroke_value); // Last parameter is the thickness
-                      cv.line(paint_window, p1, p2, rgba ,stroke_value); // Last parameter is the thickness
+                      cv.line(src, p1, p2, color_points[i] ,stroke_value); // Last parameter is the thickness
+                      cv.line(paint_window, p1, p2, color_points[i] ,stroke_value); // Last parameter is the thickness
                   }
           }
         //   console.log('POINTS : ' , points);
