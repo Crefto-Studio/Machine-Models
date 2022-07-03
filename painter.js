@@ -4,6 +4,7 @@ function openCvReady() {
       let toggle =false;
       let mode = null;
       let color = "green";
+      let delay_permission = true;
     //   let strokeID = document.getElementById("stroke_value");
     //   let stroke_str = strokeID.innerHTML;
     //   let stroke_value = 5; //By default
@@ -27,10 +28,13 @@ function openCvReady() {
     //   a = output_canvas.innerHTML;
     //   console.log("output canvas : ",a);
       if(output_canvas.innerHTML == "")
+      {
+        console.log('asdasdasdasdas');
         output_canvas.innerHTML = '<video id="cam_input" height="480" width="640" ></video>'+'<canvas id="canvas_output2" className="s"></canvas>'+
         '<canvas id="canvas_output3" className="s"></canvas>';
+      }
       const Exit_button = document.getElementById("Exit_Button");
-      if(Exit_button == "")
+      if(Exit_button.innerHTML == "")
         Exit_button.innerHTML ='<button id="Exit_Button2" onClick={exit_now}>Exit</button>';
      
 
@@ -91,7 +95,7 @@ function openCvReady() {
                   connect.push(false); // it means this point is not connected to the next one
               }
           }
-          else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle"))
+          else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle")) // to draw the line
           {
             Draw_event = true;
           }
@@ -123,7 +127,9 @@ function openCvReady() {
           }
           else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle"))
           {
-              Draw_event = false;
+            Draw_event = false;
+            // setTimeout(function(){ delay_permission = true;}, 500);
+            delay_permission = true;
           }
       event.preventDefault();
       }, true);
@@ -284,6 +290,7 @@ function openCvReady() {
                         circle_points =[];
                         color_circle_points =[];
                         stroke_circle_points = [];
+                        delay_permission = true;
                         paint_window.delete();
                         paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
                     }
@@ -296,18 +303,20 @@ function openCvReady() {
                         stroke_points.push(stroke_value);
                     }
                     // case line points
-                    else if(mode == 'line-toggle')
+                    else if(mode == 'line-toggle' && delay_permission == true)
                     {
                         line_points.push(center);
                         color_line_points.push(rgba);
                         stroke_line_points.push(stroke_value);
+                        delay_permission = false ;
                     }
                     // case circle points
-                    else if(mode == 'circle-toggle')
+                    else if(mode == 'circle-toggle' && delay_permission == true)
                     {
                         circle_points.push(center);
                         color_circle_points.push(rgba);
                         stroke_circle_points.push(stroke_value);
+                        delay_permission = false ;
                     }
               }
           }
