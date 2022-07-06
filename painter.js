@@ -1,54 +1,27 @@
 let c =false;
 function openCvReady() {
+      c=false;
       let Draw_event = false;
       let toggle =false;
       let mode = null;
-      let color = "green";
       let delay_permission = true;
-    //   let strokeID = document.getElementById("stroke_value");
-    //   let stroke_str = strokeID.innerHTML;
-    //   let stroke_value = 5; //By default
-    //   if(stroke_str[19] == 'p')
-    //     stroke_value = parseInt(stroke_str[18]);
-    //   else 
-    //     stroke_value = parseInt(stroke_str[18]+stroke_str[19]);
+      
+
       //hide sketch
       document.querySelector("#sketchpad").style.display="none";
       document.querySelector("#rendered").style.display="none";
       document.querySelector("#clear_btn").style.display="none";
       document.querySelector("#save_btn").style.display="none";
-    //   document.querySelector("#stroke").style.display="none";
       document.querySelector("#virtual").style.display="none";
 
       document.querySelector("#Exit_Button").style.display="block"; 
-      document.querySelector("p").style.display="block";      
+      document.querySelector("#config_btn").style.display="block";
+      document.querySelector("#Modes").style.display="flex";  
+      document.querySelector("#virtual_painter_Canvas").style.display="flex"; 
+      document.querySelector("#canvas_output1").style.display="none"; 
+      document.querySelector("#canvas_output2").style.display="block";
+         
      
-  // Canvas Queries and exit button
-      const output_canvas = document.querySelector("#virtual_painter_Canvas");
-    //   a = output_canvas.innerHTML;
-    //   console.log("output canvas : ",a);
-      if(output_canvas.innerHTML == "")
-      {
-        console.log('asdasdasdasdas');
-        output_canvas.innerHTML = '<video id="cam_input" height="480" width="640" ></video>'+'<canvas id="canvas_output2" className="s"></canvas>'+
-        '<canvas id="canvas_output3" className="s"></canvas>';
-      }
-      const Exit_button = document.getElementById("Exit_Button");
-      if(Exit_button.innerHTML == "")
-        Exit_button.innerHTML ='<button id="Exit_Button2" onClick={exit_now}>Exit</button>';
-     
-
-  //---------------------------------------------------- Generating Mode Values
-      const modes = ['toggle','hold','line-toggle','circle-toggle'];
-      // generate the radio group        
-      const group = document.querySelector("#mode");
-      if(group.innerHTML == "")
-        group.innerHTML += modes.map((modes) => `
-                <input type="radio" name="mode" value="${modes}" id="${modes}">
-                <label for="${modes}">${modes}</label>
-            `).join(' ');
-     
-  
       // add an event listener for the change event
       const radioButtons = document.querySelectorAll('input[name="mode"]');
       for(const radioButton of radioButtons){
@@ -59,80 +32,82 @@ function openCvReady() {
           if (this.checked)
               mode=this.value;
       }
+    //   if(mode == null)
+    //     mode ="hold";
   //---------------------------------------------------- Display divisions again in case exit
-     output_canvas.style.display='block';
-     group.style.display='flex';
-     Exit_button.style.display ='inline';
+    //  output_canvas.style.display='block';
+    //  group.style.display='flex';
+    //  Exit_button.style.display ='inline';
     //   Exit_button.style.display='inline';
-      c=false;
+    //   c=false;
   
   //---------------------------------------------------- Event handler for pressing on space 
-      window.addEventListener("keydown", function(event) 
-      {
-          if (event.defaultPrevented) 
-          {
-              return;
-          }
-          if (event.code == "Space" && mode == "hold") // handle space hold when space is pressed
-          {
-              Draw_event = true;
-            //   console.log('Space');
-          }
-          else if (event.code == "Space" && mode == "toggle") // handle space toggle
-          {
-              if(toggle == false) // if toggle was false and i pressed on space then this is an order to start drawing
-              {
-                  Draw_event = true;
-                  toggle = true;
-                //   console.log('Space');
-              }
-              else if(toggle == true) // if toggle was true and i pressed on space then this is an order to stop drawing
-              {
-                  Draw_event = false;
-                  toggle = false;
-                  //manage connectivity :
-                  connect.pop();
-                  connect.push(false); // it means this point is not connected to the next one
-              }
-          }
-          else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle")) // to draw the line
-          {
+      const keydownHandler = function(event){
+        if (event.defaultPrevented) 
+        {
+            return;
+        }
+        if (event.code == "Space" && mode == "hold") // handle space hold when space is pressed
+        {
             Draw_event = true;
-          }
-      event.preventDefault();
-      }, true);
-  
+          //   console.log('Space');
+          //   console.log('draw_event',Draw_event);
+        }
+        else if (event.code == "Space" && mode == "toggle") // handle space toggle
+        {
+            if(toggle == false) // if toggle was false and i pressed on space then this is an order to start drawing
+            {
+                Draw_event = true;
+                toggle = true;
+              //   console.log('Space');
+            }
+            else if(toggle == true) // if toggle was true and i pressed on space then this is an order to stop drawing
+            {
+                Draw_event = false;
+                toggle = false;
+                //manage connectivity :
+                connect.pop();
+                connect.push(false); // it means this point is not connected to the next one
+            }
+        }
+        else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle")) // to draw the line
+        {
+          Draw_event = true;
+        }
+    event.preventDefault();
+    }
+    window.addEventListener("keydown", keydownHandler , true);
   //------------------------------------------------------------------- Event handler for releasing space
-      window.addEventListener("keyup", function(event) 
-      {
-          if (event.defaultPrevented) 
-          {
-              return;
-          }
-          if (event.code == "Space" && mode == "hold") // handle space hold when space is released
-          {
-              //manage connectivity :
-              if(Draw_event)
-              {
-                  Draw_event = false;
-                  connect.pop();
-                  connect.push(false);
-                //   console.log('Space false');
-              }
-          }
-          else if (event.code == "Space" && mode == "toggle" && toggle ==true) // handle space toggle when space is released
-          {
-              Draw_event = true;
-            //   console.log('Space');
-          }
-          else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle"))
-          {
-            Draw_event = false;
-            // setTimeout(function(){ delay_permission = true;}, 500);
-            delay_permission = true;
-          }
-      event.preventDefault();
-      }, true);
+      const keyupHandler = function(event){
+        if (event.defaultPrevented) 
+        {
+            return;
+        }
+        if (event.code == "Space" && mode == "hold") // handle space hold when space is released
+        {
+            //manage connectivity :
+            if(Draw_event)
+            {
+                Draw_event = false;
+                connect.pop();
+                connect.push(false);
+              //   console.log('Space false');
+            }
+        }
+        else if (event.code == "Space" && mode == "toggle" && toggle ==true) // handle space toggle when space is released
+        {
+            Draw_event = true;
+          //   console.log('Space');
+        }
+        else if(event.code == "Space" && (mode == "line-toggle" || mode == "circle-toggle"))
+        {
+          Draw_event = false;
+          // setTimeout(function(){ delay_permission = true;}, 500);
+          delay_permission = true;
+        }
+    event.preventDefault();
+    }
+    window.addEventListener("keyup", keyupHandler, true);
   //------------------------------------------------------------------- Setup
       let video = document.getElementById("cam_input"); // video is the id of video tag
       navigator.mediaDevices.getUserMedia({ video: true, audio: false })
@@ -168,15 +143,24 @@ function openCvReady() {
       function processVideo() {
         if(c==true)  
           {
-            // console.log(output_canvas.style.display);
-            output_canvas.style.display='none';
-            group.style.display='none';
-            Exit_button.style.display = 'none';
-            document.querySelector("#virtual").style.display='inline';
             src.delete();
             hsv.delete();
             mask.delete();
+            let canvas = document.querySelector("#sketchpad");
+            let ctx = canvas.getContext('2d');
+            let imageData= ctx.createImageData(paint_window.cols,paint_window.rows);
+            imageData.data.set(new Uint8ClampedArray(paint_window.data,paint_window.cols,paint_window.rows));
+            canvas.height=paint_window.rows;
+            canvas.width=paint_window.cols;
+            arr=imageData.data;
+            console.log("in:",arr);
+            ctx.putImageData(imageData,0,0);
             paint_window.delete(); 
+            window.removeEventListener("keydown", keydownHandler , true);
+            window.removeEventListener("keyup", keyupHandler, true);
+            for(const radioButton of radioButtons){
+                radioButton.checked = false;
+            } 
             return; 
           }
           
@@ -202,23 +186,23 @@ function openCvReady() {
         rgba.push(255);
           //src.copyTo(hsv);
   
-            //   let lower_hue = document.getElementById('lower_hue').value;
-            //   let upper_hue = document.getElementById('upper_hue').value;
-            //   let lower_sat = document.getElementById('lower_sat').value;
-            //   let upper_sat = document.getElementById('upper_sat').value;
-            //   let lower_val = document.getElementById('lower_val').value;
-            //   let upper_val = document.getElementById('upper_val').value;
-        
-        //   let lower_hsv_a = [lower_hue, lower_sat, lower_val];
-        //   let upper_hsv_a = [upper_hue, upper_sat, upper_val];
-            let lower_hsv_a = [];
-            let upper_hsv_a = [];
+                let lower_hue = document.getElementById('lower_hue').value;
+                let upper_hue = document.getElementById('upper_hue').value;
+                let lower_sat = document.getElementById('lower_sat').value;
+                let upper_sat = document.getElementById('upper_sat').value;
+                let lower_val = document.getElementById('lower_val').value;
+                let upper_val = document.getElementById('upper_val').value;
+            
+            let lower_hsv_a = [lower_hue, lower_sat, lower_val];
+            let upper_hsv_a = [upper_hue, upper_sat, upper_val];
+            // let lower_hsv_a = [];
+            // let upper_hsv_a = [];
 
-            if(color =='green')
-            {
-                lower_hsv_a = [56,66,0];
-                upper_hsv_a = [100,255,255];
-            }
+            // if(color =='green')
+            // {
+            //     lower_hsv_a = [56,66,0];
+            //     upper_hsv_a = [100,255,255];
+            // }
 
   
         //   console.log('lower : ',lower_hsv_a);
@@ -274,7 +258,6 @@ function openCvReady() {
 
               //Marker
               cv.line(src, p, p, rgba ,stroke_value); // Last parameter is the thickness  
-              
               if(center[0] && Draw_event == true)
               {
                     //case clear all
@@ -291,8 +274,11 @@ function openCvReady() {
                         color_circle_points =[];
                         stroke_circle_points = [];
                         delay_permission = true;
-                        paint_window.delete();
-                        paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
+                        Draw_event= false;
+                        toggle =false;
+                        radioButtons.value("");
+                        // paint_window.delete();
+                        // paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
                     }
                     // case connected points
                     else if(mode == 'hold' || mode =='toggle')
@@ -322,7 +308,7 @@ function openCvReady() {
           }
   
       //----------------------------------------------------------- Drawing
-          
+          console.log('POINTS : ',points);
           // Draw the connected points
           for(var i=1;i<points.length;i++)
           {
@@ -382,7 +368,8 @@ function openCvReady() {
   
   
       //----------------------------------------------------------- IM SHOW
-        //   cv.imshow("canvas_output", mask);
+          if(document.querySelector("#ex_config").style.display =="block") 
+            cv.imshow("canvas_output1", mask);
           cv.imshow("canvas_output2", src);
           cv.imshow("canvas_output3", paint_window);
           // schedule next one.
@@ -396,10 +383,49 @@ function openCvReady() {
 function exit_now()
 {
     c = true;
+
     document.querySelector("#sketchpad").style.display="block";
     document.querySelector("#rendered").style.display="flex";
     document.querySelector("#clear_btn").style.display="block";
     document.querySelector("#save_btn").style.display="block";
     document.querySelector("#stroke").style.display="block"; 
-    document.querySelector("p").style.display="none"; 
+    document.querySelector("#virtual").style.display="block";
+    // document.querySelector("p").style.display="none"; 
+    document.querySelector("#Exit_Button").style.display="none"; 
+    document.querySelector("#Modes").style.display="none";  
+    document.querySelector("#virtual_painter_Canvas").style.display="none"; 
+    document.querySelector("#navbar").style.display="none"; 
+    document.querySelector("#config_btn").style.display="none";
+    document.querySelector("#ex_config").style.display="none";
+    
+
+//mohamed amr
+    // let canvas = document.querySelector("#sketchpad");
+    // let ctx = canvas.getContext('2d');
+    // var data=ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // console.log(data.data);
+    // const myJSON = JSON.stringify(data.data);
+    // console.log(myJSON);
 }
+
+function config(){
+    document.querySelector("#navbar").style.display="flex"; 
+    document.querySelector("#virtual_painter_Canvas").style.display="flex"; 
+    document.querySelector("#canvas_output1").style.display="block";
+    document.querySelector("#canvas_output3").style.display="none";  
+    document.querySelector("#config_btn").style.display="none";
+    document.querySelector("#ex_config").style.display="block";
+    document.querySelector("#Modes").style.display="none"; 
+}
+
+function exit_config(){
+    document.querySelector("#navbar").style.display="none";
+    document.querySelector("#canvas_output1").style.display="none";
+    document.querySelector("#canvas_output3").style.display="block"; 
+    document.querySelector("#config_btn").style.display="block";
+    document.querySelector("#ex_config").style.display="none";
+    document.querySelector("#Modes").style.display="flex"; 
+}
+
+
+

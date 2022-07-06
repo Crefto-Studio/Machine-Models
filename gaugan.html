@@ -38,6 +38,13 @@
     <div id="root"></div>
 
     <style>
+        #nav{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+       
+
         
         .container {
             display: flex;
@@ -50,12 +57,12 @@
             font-family: 'Roboto', sans-serif;
         }
         #virtual_painter_Canvas{
-            display: flex;
+            display: none;
             flex-direction: row-reverse;
             justify-content: center;
             align-items: center;
         }
-        #sketchpad, #rendered ,#canvas_output2,#canvas_output3{
+        #sketchpad, #rendered ,#canvas_output2,#canvas_output3,#canvas_output1{
             width: 512px;
             height: 512px;
             background: #262626;
@@ -114,7 +121,7 @@
 
         #toolbar {
             background: #303030;
-            width: 200px;
+            width: 220px;
             height: 512px;
             margin: 5px;
             padding: 8px;
@@ -150,13 +157,16 @@
             color: white;
         }
 
-        input,#virtual ,#Exit_Button{
+        input,#virtual ,#Exit_Button,#config_btn,#ex_config{
             width: 98%;
         }
-        #Exit_Button,p{
+        #Exit_Button,#config_btn,#ex_config{
             display: none;
         }
-        #Exit_Button2{
+        p{
+            margin-bottom: 0px;
+        }
+        /* #Exit_Button2{
             background: none;
             color: inherit;
             border: none;
@@ -164,11 +174,11 @@
             font: inherit;
             cursor: pointer;
             outline: inherit;
-        }
-        #hold,#toggle{
+        } */
+        /* #hold,#toggle{
             width: 20%;
-        }
-        input[type="button"] ,#virtual,#Exit_Button{
+        } */
+        input[type="button"] ,#virtual,#Exit_Button,#config_btn,#ex_config{
             padding: 7px;
             background: #676767;
             color: white;
@@ -186,7 +196,7 @@
             border: #AFF20A 4px solid;
         }
         #Modes{
-            display: flex;
+            display: none;
             flex-direction: column;
         }
         #mode{
@@ -196,6 +206,64 @@
         #mode>label{
             margin-left: -0.5rem; 
         }
+
+        #navbar{
+    top:0px;
+    display: none;
+    flex-direction: row;
+}
+#color1,
+#color2,
+#color3,
+#color4 {
+  display: inline-block;
+  background-color: white;
+  height: 80px;
+}
+
+#color1 {
+  border-bottom: 12px solid #D4838F;
+  width: 16.67%;
+}
+
+#color2 {
+  border-bottom: 12px solid #2B879E;
+  width: 16.67%;
+}
+
+
+#color3 {
+  border-bottom: 12px solid #3EC9A7;
+  width: 16.67%;
+}
+
+
+
+
+#color4 {
+  border-bottom: 12px solid #F2E8C4;
+  width: 16.67%;
+}
+
+#color5{
+    border-bottom: 12px solid #3EC9A7;
+  width: 16.67%;
+}
+
+#color6{
+    border-bottom: 12px solid #D4838F;
+  width:16.67%;
+}
+.radios{
+    display: flex;
+    flex-direction: column;
+}
+.radios label{
+    padding-right: 15px;
+   margin: auto;
+   width: 50%;
+}
+
     </style>
     <script type="text/babel">
         // this.sketchpad.color = 'none';
@@ -321,6 +389,36 @@
            
             render() {
                 return <React.Fragment>
+                    <div id="nav">
+                        <div id="navbar">
+                        <div id="color1" className="col-xs-3">
+                            <div className="label">Lower Hue : {this.state.strokeWidth}px</div>
+                            <input type="range" id="lower_hue" defaultValue ="57" min="0" max ="180"/>
+                        </div>
+                        <div id="color2" className="col-xs-3">
+                            <div className="label">Lower Sat : {this.state.strokeWidth}px</div>
+                            <input type="range" id="lower_sat" defaultValue ="67" min="0" max ="255"/>
+                        </div>
+                        <div id="color3" className="col-xs-3">
+                            <div className="label">Lower Val : {this.state.strokeWidth}px</div>
+                            <input type="range" id="lower_val" defaultValue ="0" min="0" max ="255"/>
+                        </div>
+                        <div id="color4" className="col-xs-3">
+                            <div className="label">Upper Hue : {this.state.strokeWidth}px</div>
+                            <input type="range" id="upper_hue" defaultValue ="100" min="0" max ="180"/>
+                        </div>
+                        <div id="color5" className="col-xs-3">
+                            <div className="label">Upper Sat : {this.state.strokeWidth}px</div>
+                            <input type="range" id="upper_sat" defaultValue ="255" min="0" max ="255"/>
+                        </div>
+                        <div id="color6" className="col-xs-3">
+                            <div className="label">Upper Val : {this.state.strokeWidth}px</div>
+                            <input type="range" id="upper_val" defaultValue ="255" min="0" max ="255"/>
+                            
+                        </div>
+                        
+                    </div>
+
                     <div className="container">
                         <div id="toolbar">
                             <div className="row">
@@ -330,12 +428,36 @@
                                 {/* button Event for Virtual painter*/}
                                 <button id="virtual" onClick={openCvReady}>Virtual Painter</button>
                                   {/* Exit Button for virtual Painter*/}
-                                <button id="Exit_Button" className="btn" onClick={exit_now}>Exit</button>
+                                <button id="Exit_Button" className="btn" onClick={exit_now}>
+                                    Exit Virtual
+                                    </button>
+                                    <button id="config_btn" className="btn" onClick={config}>
+                                    Config
+                                    </button>
+                                    <button id="ex_config" className="btn" onClick={exit_config}>
+                                    Exit Config
+                                    </button>
+
                                 {/* Modes of Drawing in Virtual painter*/}
                                 <div id="Modes">
                                     <p>Select your work mode:</p>
                                     <div id="mode">
-
+                                        <div className="radios">
+                                        <input type="radio" name="mode" value="toggle" id="toggle"/>
+                                        <label>toggle</label>
+                                        </div>
+                                        <div className="radios">
+                                        <input type="radio" name="mode" value="hold" id="hold"/>
+                                        <label>hold</label>
+                                        </div>
+                                        <div className="radios">
+                                        <input type="radio" name="mode" value="line-toggle" id="line-toggle"/>
+                                        <label>line</label>
+                                        </div>
+                                        <div className="radios">
+                                        <input type="radio" name="mode" value="circle-toggle" id="circle-toggle"/>
+                                        <label>circle</label>
+                                        </div>
                                         </div>
                                 </div>
                                
@@ -368,6 +490,10 @@
                         
                         {/*Virtual Painter output Canvas*/}
                         <div id="virtual_painter_Canvas">
+                            <video id="cam_input" height="512" width="512" ></video>
+                            <canvas id="canvas_output1" className="s"></canvas>
+                            <canvas id="canvas_output2" className="s"></canvas>
+                            <canvas id="canvas_output3" className="s"></canvas>
                         </div>
                         {/*sketchpad*/}
                         <canvas id="sketchpad" className="s" ref={this.canvasRef}></canvas>
@@ -380,7 +506,7 @@
                             <div className="btn-render" onClick={this.generateSketch}>Generate Image</div>
                         </div>
                     </div>
-                   
+                   </div>
                     
                 </React.Fragment>;
             }
