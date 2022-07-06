@@ -5,3 +5,4 @@ This Branch is Concerned with integrating the virtual painter Js with the front 
 2- circle drawing.<br>
 3- configuration of stroke.<br>
 4- configuration of colors.<br>
+5- configuration button for the mask .<br>
