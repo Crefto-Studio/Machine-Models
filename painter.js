@@ -4,6 +4,7 @@ function openCvReady() {
       let Draw_event = false;
       let toggle =false;
       let mode = null;
+      let color = "green";
       let delay_permission = true;
       
 
@@ -12,7 +13,11 @@ function openCvReady() {
       document.querySelector("#rendered").style.display="none";
       document.querySelector("#clear_btn").style.display="none";
       document.querySelector("#save_btn").style.display="none";
+      document.querySelector("#save_btn2").style.display="none";
       document.querySelector("#virtual").style.display="none";
+      document.querySelector("#share").style.display="none";
+
+      document.getElementById("model-canvas").style.display="none";
 
       document.querySelector("#Exit_Button").style.display="block"; 
       document.querySelector("#config_btn").style.display="block";
@@ -20,6 +25,7 @@ function openCvReady() {
       document.querySelector("#virtual_painter_Canvas").style.display="flex"; 
       document.querySelector("#canvas_output1").style.display="none"; 
       document.querySelector("#canvas_output2").style.display="block";
+      document.querySelector("#canvas_output3").style.display="block";
          
      
       // add an event listener for the change event
@@ -238,17 +244,19 @@ function openCvReady() {
           if(contours.size() > 0)
           {
               // getting the contour of max area
-                  let area = 0;
-                  let max= 0;
-                  let cnt = 0;
+              let area = 0;
+              let max= 0;
+              let cnt = 0;
+              let current_cnt=0;
               for(var i=0;i<contours.size();i++)
               {
-                  cnt = contours.get(i);
-                  area = cv.contourArea(cnt, false);
-                  if(area >max)
-                  {
-                      max = area;
-                  }
+                    current_cnt = contours.get(i);
+                    area = cv.contourArea(current_cnt, false);
+                    if(area >max)
+                    {
+                        max = area;
+                        cnt = current_cnt;
+                    }
               }
   
               let M = cv.moments(cnt, false);
@@ -276,7 +284,6 @@ function openCvReady() {
                         delay_permission = true;
                         Draw_event= false;
                         toggle =false;
-                        radioButtons.value("");
                         // paint_window.delete();
                         // paint_window = new cv.Mat(video.height, video.width, cv.CV_8UC4, [255,255,255,255]);
                     }
@@ -388,6 +395,8 @@ function exit_now()
     document.querySelector("#rendered").style.display="flex";
     document.querySelector("#clear_btn").style.display="block";
     document.querySelector("#save_btn").style.display="block";
+    document.querySelector("#save_btn2").style.display="block";
+    document.querySelector("#share").style.display="block";
     document.querySelector("#stroke").style.display="block"; 
     document.querySelector("#virtual").style.display="block";
     // document.querySelector("p").style.display="none"; 
@@ -397,15 +406,55 @@ function exit_now()
     document.querySelector("#navbar").style.display="none"; 
     document.querySelector("#config_btn").style.display="none";
     document.querySelector("#ex_config").style.display="none";
-    
 
 //mohamed amr
-    // let canvas = document.querySelector("#sketchpad");
-    // let ctx = canvas.getContext('2d');
-    // var data=ctx.getImageData(0, 0, canvas.width, canvas.height);
-    // console.log(data.data);
-    // const myJSON = JSON.stringify(data.data);
-    // console.log(myJSON);
+    //mohamed amr
+//     let canvas = document.querySelector("#sketchpad");
+//     let ctx = canvas.getContext('2d');
+//     var data=ctx.getImageData(0, 0, canvas.width, canvas.height);
+//     console.log(data.data);
+
+//      //take alpha
+//      var alpha = data.data.filter(function (v, i) {
+//         return i % 4 == 3;
+//     });
+//     //take blue
+//     var blue = data.data.filter(function (v, i) {
+//         return i % 4 == 2;
+//     });
+//     //take green
+//     var green = data.data.filter(function (v, i) {
+//         return i % 4 == 1;
+//     });
+//     //take red
+//     var red = data.data.filter(function (v, i) {
+//         return i % 4 == 0;
+//     });
+
+// // let red_obj={};
+// // Object.assign(red_obj, red);
+// // let text=red.join();
+// // red_obj["r"]=[];
+// // red_obj["r"]=red
+
+// var normalred = Array.from(red);
+// var normalgreen = Array.from(green);
+// var normalblue = Array.from(blue);
+// var normalalpha = Array.from(alpha);
+//     let obj = {};
+//     obj["ALPHA"]=normalalpha;
+//     obj["BLUE"]=normalblue;
+//     obj["GREEN"]=normalgreen;
+//     obj["RED"]=normalred;
+    
+    
+   
+//     console.log(obj); 
+
+   
+    
+//     const myJSON = JSON.stringify(obj);
+//     console.log(myJSON);
 }
 
 function config(){
@@ -427,5 +476,133 @@ function exit_config(){
     document.querySelector("#Modes").style.display="flex"; 
 }
 
+//for post
+//toggle
+function display_pop(){
+    document.getElementById('wrapper').style.display="block";
+}
+function lock_pop(){
+    document.getElementById('wrapper').style.display="none";
+}
+
+//for del btn
+function trash(){
+    document.querySelector('#title').value = '';
+    document.querySelector('#desc').value = '';
+  //   quill.setText('');
+  //   toaster('Trashed');
+  }
+
+  
+  //model
+  function run_model(){
+    document.getElementById("model-canvas").style.display="flex";
+    document.getElementById("rendered").style.display="none";
+    let canvas = document.querySelector("#model-canvas");
+    let ctx = canvas.getContext('2d');
+    ctx.fillStyle = "red";
+    ctx.fillRect(100, 100, 50, 50);
+
+  }
+
+
+
+
+  function dataURLtoFile(dataurl, filename) {
+    // convert base64 to raw binary data held in a string
+   // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+   var byteString = atob(dataurl.split(',')[1]);
+
+   // separate out the mime component
+   var mimeString = dataurl.split(',')[0].split(':')[1].split(';')[0];
+
+   // write the bytes of the string to an ArrayBuffer
+   var ab = new ArrayBuffer(byteString.length);
+   var ia = new Uint8Array(ab);
+   for (var i = 0; i < byteString.length; i++) {
+       ia[i] = byteString.charCodeAt(i);
+   }
+
+   //New Code
+   return new Blob([ab], {type: mimeString});
+}
+
+  function post_prof(){
+    document.getElementById('post_btn').innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+    var d=document.getElementById("Drawing");
+    var o=document.getElementById("Output");
+    if(d.checked){
+        let canvas = document.querySelector("#sketchpad");
+        let ctx = canvas.getContext('2d');
+        ctx.globalCompositeOperation="destination-over";
+        ctx.beginPath();
+        ctx.rect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+    
+        url = document.getElementById('sketchpad').toDataURL();
+    }
+    else{
+    let canvas = document.querySelector("#model-canvas");
+    let ctx = canvas.getContext('2d');
+  ctx.globalCompositeOperation="destination-over";
+    ctx.beginPath();
+	ctx.rect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = "#ffffff";
+	ctx.fill();
+
+    url = document.getElementById('model-canvas').toDataURL();
+    }
+    // console.log(url);
+
+    var fileData = dataURLtoFile(url, "imageName.png");
+    console.log("Here is JavaScript File Object", fileData);
+
+    let token = document.cookie;
+    console.log(token);
+	token = token.split("=");
+
+    var formdata = new FormData();
+	formdata.append('name', document.getElementById('title').value);
+	formdata.append('type', "Fingo");
+	formdata.append('postImg', fileData);
+	formdata.append('description', document.getElementById('desc').value);
+
+	var myHeaders = new Headers();
+
+	myHeaders.append("Authorization", `Bearer ${token[1]}`);
+	console.log("222222222222222222");
+	console.log(token[1]);
+	var requestOptions = {
+		method: 'POST',
+		headers: myHeaders,
+		body: formdata,
+		redirect: 'follow'
+	};
+
+    fetch("http://www.api.crefto.studio/api/v1/posts", requestOptions)
+
+		.then(response => response.json())
+
+		.then(json => {
+			console.log(json);
+            if(json.status=="success"){
+			// alert("mabroook");
+            document.getElementById('post_btn').innerHTML='Post';
+            document.getElementById('fail_cond').style.color="#49D907";
+            document.getElementById('fail_cond').innerHTML="Posted Successfully";
+            trash();
+            }
+            else{
+                document.getElementById('fail_cond').style.color="#FBA504";
+                document.getElementById('fail_cond').innerHTML="&nbsp;Fail!! "+json.message;
+                document.getElementById('post_btn').innerHTML='Post';
+            }
+		})
+
+		.catch((err) => {
+			console.error(err);
+		})
+}
 
 
